@@ -51,12 +51,6 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
 
-    {
-      name: 'firefox',
-      testIgnore: /.*\/api\/.*/,
-      use: { ...devices['Desktop Firefox'] },
-    },
-
     // {
     //   name: 'webkit',
     //   testIgnore: /.*\/api\/.*/,

@@ -9,6 +9,8 @@ import { waitForNewTab } from '../../utils/tabHandle';
 
 test.describe('@sanity Booking.com hotel search and booking flow', () => {
   test('Full flow: homepage → search → listings → filters → first hotel detail', { timeout: 180000 }, async ({ page }, testInfo) => {
+    // Skip in CI: Booking.com often blocks or throttles datacenter IPs (GitHub Actions); run locally.
+    test.skip(!!process.env.CI, 'Booking.com UI test skipped in CI; run locally');
     const loginPage = new LoginPage(page);
     const searchPage = new SearchPage(page);
     const resultsPage = new ResultsPage(page);
