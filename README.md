@@ -114,3 +114,10 @@ npx playwright test tests/ui/booking-flow.spec.js --project=chromium --timeout=1
 ```
 
 Then use the report to open the run and download or view the **booking-final-step.png** screenshot.
+
+
+##CI
+```bash
+![Playwright CI](https://github.com/<your-username>/<repo-name>/actions/workflows/playwright-ci.yml/badge.svg)
+
+```
