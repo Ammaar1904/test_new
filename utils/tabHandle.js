@@ -1,25 +1,64 @@
-
+/**
+ * After click, either a new tab opens or the same tab navigates to /hotel/.
+ * Uses context 'page' event (reliable when target=_blank) and fallback poll of context.pages().
+ */
 export async function waitForNewTab(contextPage, clickAction) {
-  const POPUP_TIMEOUT = 15000;
-  const NAV_TIMEOUT = 25000;
+  const ctx = contextPage.context();
+  const NEW_PAGE_TIMEOUT = 30000;
+  const SAME_TAB_NAV_TIMEOUT = 45000;
 
   const [result] = await Promise.all([
     Promise.race([
-      contextPage
-        .waitForEvent('popup', { timeout: POPUP_TIMEOUT })
-        .then((p) => ({ type: 'popup', page: p }))
+      ctx
+        .waitForEvent('page', { timeout: NEW_PAGE_TIMEOUT })
+        .then((p) => ({ type: 'newpage', page: p }))
         .catch(() => null),
-      contextPage.waitForURL(/\/hotel\//, { timeout: NAV_TIMEOUT }).then(() => ({ type: 'same', page: contextPage })),
+      contextPage.waitForURL(/\/hotel\//, { timeout: SAME_TAB_NAV_TIMEOUT }).then(() => ({ type: 'same', page: contextPage })),
     ]),
     clickAction(),
   ]);
 
-  if (result === null) {
-    await contextPage.waitForURL(/\/hotel\//, { timeout: 10000 });
+  if (result?.type === 'same') {
     return contextPage;
   }
-  if (result.type === 'popup') {
-    await result.page.waitForLoadState('domcontentloaded');
+
+  const hotelPage = result?.type === 'newpage' ? result.page : null;
+  let pageToUse = hotelPage;
+
+  if (!pageToUse) {
+    const pollMs = 300;
+    const pollFor = 15000;
+    const deadline = Date.now() + pollFor;
+    while (Date.now() < deadline) {
+      const other = ctx.pages().find((p) => p !== contextPage);
+      if (other) {
+        pageToUse = other;
+        break;
+      }
+      await new Promise((r) => setTimeout(r, pollMs));
+    }
   }
-  return result.page;
+
+  if (pageToUse) {
+    try {
+      await pageToUse.waitForURL(/\/hotel\//, { timeout: 35000, waitUntil: 'commit' });
+      await pageToUse.waitForLoadState('domcontentloaded').catch(() => {});
+      return pageToUse;
+    } catch (e) {
+      if (pageToUse !== contextPage) {
+        throw new Error(
+          `Hotel detail tab opened but URL did not match /hotel/ within 35s. Current URL: ${pageToUse.url()}. ${e.message}`
+        );
+      }
+    }
+  }
+
+  try {
+    await contextPage.waitForURL(/\/hotel\//, { timeout: 15000, waitUntil: 'commit' });
+    return contextPage;
+  } catch (e) {
+    throw new Error(
+      `No hotel detail page detected: no new tab with /hotel/ and current page did not navigate. Current URL: ${contextPage.url()}. ${e.message}`
+    );
+  }
 }

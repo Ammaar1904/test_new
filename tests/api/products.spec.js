@@ -3,6 +3,7 @@ const { test, expect } = require('@playwright/test');
 const { JSONPath } = require('jsonpath-plus');
 const { endpoints, defaultHeaders } = require('../../api/config');
 const { validateProductSchema } = require('../../api/productSchema');
+const {data} = require ('../../test-data/example');
 
 test.describe('FakeStore API – Products', () => {
   test('GET – Fetch all products: status 200, list size ≥ 10, print names and prices', async ({

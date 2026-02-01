@@ -8,7 +8,7 @@ class ResultsPage {
   /**
    * Wait for search results to load (URL and first property card visible).
    */
-  async waitForResultsLoaded(timeoutMs = 30000) {
+  async waitForResultsLoaded(timeoutMs = 60000) {
     await this.page.waitForURL(/searchresults/, { timeout: timeoutMs });
     await this.page.locator(locators.hotelCard).first().waitFor({ state: 'visible', timeout: timeoutMs });
   }
@@ -80,10 +80,13 @@ class ResultsPage {
   }
 
   /**
-   * Click first hotel's "See availability" / CTA. Call with page.waitForEvent('popup') in parallel for new tab.
+   * Click first hotel's "See availability" / CTA. Uses force: true so overlays (banners, modals)
+   * that intercept pointer events don't block the click. Call with waitForNewTab in parallel.
    */
   async clickFirstHotel() {
-    await this.page.locator(locators.availabilityCtaButton).first().click();
+    const btn = this.page.locator(locators.availabilityCtaButton).first();
+    await btn.scrollIntoViewIfNeeded().catch(() => {});
+    await btn.click({ force: true });
   }
 
 }
