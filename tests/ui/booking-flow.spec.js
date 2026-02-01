@@ -7,8 +7,10 @@ import { locators } from '../../locator/locator';
 import { waitForNewTab } from '../../utils/tabHandle';
 
 
-test.describe.skip(!!process.env.CI, '@sanity Booking.com hotel search and booking flow', () => {
-  test('Full flow: homepage → search → listings → filters → first hotel detail', { timeout: 180000 }, async ({ page }, testInfo) => {
+test.describe('@sanity Booking.com hotel search and booking flow', () => {
+  test('Full flow: homepage → search → listings → filters → first hotel detail', {
+    timeout: process.env.CI ? 360000 : 180000,
+  }, async ({ page }, testInfo) => {
     const loginPage = new LoginPage(page);
     const searchPage = new SearchPage(page);
     const resultsPage = new ResultsPage(page);

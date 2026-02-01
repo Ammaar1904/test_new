@@ -16,7 +16,7 @@ export default defineConfig({
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
-  timeout: 250 * 1000, // 3 min default so Full flow (Booking.com) can complete in CI
+  timeout: process.env.CI ? 360 * 1000 : 250 * 1000, // 6 min in CI for slow runners; 3 min locally
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
@@ -48,7 +48,14 @@ export default defineConfig({
     {
       name: 'chromium',
       testIgnore: /.*\/api\/.*/,
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        ...(process.env.CI && {
+          viewport: { width: 1280, height: 720 },
+          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          locale: 'en-GB',
+        }),
+      },
     },
 
     // {

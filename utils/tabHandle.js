@@ -4,8 +4,12 @@
  */
 export async function waitForNewTab(contextPage, clickAction) {
   const ctx = contextPage.context();
-  const NEW_PAGE_TIMEOUT = 30000;
-  const SAME_TAB_NAV_TIMEOUT = 45000;
+  const isCI = !!process.env.CI;
+  const NEW_PAGE_TIMEOUT = isCI ? 60000 : 30000;
+  const SAME_TAB_NAV_TIMEOUT = isCI ? 90000 : 45000;
+  const POLL_FOR = isCI ? 25000 : 15000;
+  const HOTEL_URL_TIMEOUT = isCI ? 60000 : 35000;
+  const FALLBACK_SAME_TAB = isCI ? 30000 : 15000;
 
   const [result] = await Promise.all([
     Promise.race([
@@ -27,8 +31,7 @@ export async function waitForNewTab(contextPage, clickAction) {
 
   if (!pageToUse) {
     const pollMs = 300;
-    const pollFor = 15000;
-    const deadline = Date.now() + pollFor;
+    const deadline = Date.now() + POLL_FOR;
     while (Date.now() < deadline) {
       const other = ctx.pages().find((p) => p !== contextPage);
       if (other) {
@@ -41,20 +44,20 @@ export async function waitForNewTab(contextPage, clickAction) {
 
   if (pageToUse) {
     try {
-      await pageToUse.waitForURL(/\/hotel\//, { timeout: 35000, waitUntil: 'commit' });
+      await pageToUse.waitForURL(/\/hotel\//, { timeout: HOTEL_URL_TIMEOUT, waitUntil: 'commit' });
       await pageToUse.waitForLoadState('domcontentloaded').catch(() => {});
       return pageToUse;
     } catch (e) {
       if (pageToUse !== contextPage) {
         throw new Error(
-          `Hotel detail tab opened but URL did not match /hotel/ within 35s. Current URL: ${pageToUse.url()}. ${e.message}`
+          `Hotel detail tab opened but URL did not match /hotel/ within ${HOTEL_URL_TIMEOUT / 1000}s. Current URL: ${pageToUse.url()}. ${e.message}`
         );
       }
     }
   }
 
   try {
-    await contextPage.waitForURL(/\/hotel\//, { timeout: 15000, waitUntil: 'commit' });
+    await contextPage.waitForURL(/\/hotel\//, { timeout: FALLBACK_SAME_TAB, waitUntil: 'commit' });
     return contextPage;
   } catch (e) {
     throw new Error(

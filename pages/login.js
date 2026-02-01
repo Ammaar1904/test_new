@@ -25,7 +25,8 @@ class LoginPage {
     const logoOrSearch = this.page.locator(locators.logo)
       .or(this.page.locator(locators.searchBox))
       .or(this.page.locator(locators.destinationInput));
-    await logoOrSearch.first().waitFor({ state: 'visible', timeout: 30000 });
+    const homeTimeout = process.env.CI ? 60000 : 30000;
+    await logoOrSearch.first().waitFor({ state: 'visible', timeout: homeTimeout });
   }
 }
 
