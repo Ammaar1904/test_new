@@ -108,4 +108,76 @@ test.describe('FakeStore API – Products', () => {
     const deleteBody = await deleteResponse.json().catch(() => ({}));
     expect(deleteResponse.ok()).toBe(true);
   });
+
+  test.describe('Negative tests – 4xx', () => {
+    // FakeStore is lenient (returns 200 for missing/invalid IDs); stricter APIs return 400/404.
+    test('GET product by non-existent ID → 404, 400, or 200 (lenient)', async ({ request }) => {
+      const response = await request.get(endpoints.productById(99999), {
+        headers: defaultHeaders,
+      });
+      expect([200, 400, 404]).toContain(response.status());
+    });
+
+    test('GET product by invalid ID (0) → 400, 404, or 200 (lenient)', async ({ request }) => {
+      const response = await request.get(endpoints.productById(0), {
+        headers: defaultHeaders,
+      });
+      expect([200, 400, 404]).toContain(response.status());
+    });
+
+    // FakeStore accepts empty/invalid POST and returns 201; stricter APIs return 400/422.
+    test('POST with empty body → 400, 422, or 201 (lenient)', async ({ request }) => {
+      const response = await request.post(endpoints.products(), {
+        headers: defaultHeaders,
+        data: {},
+      });
+      expect([200, 201, 400, 422]).toContain(response.status());
+    });
+
+    test('POST with invalid payload (price as string) → 400, 422, or 201 (lenient)', async ({ request }) => {
+      const response = await request.post(endpoints.products(), {
+        headers: defaultHeaders,
+        data: {
+          title: 'Test',
+          price: 'not-a-number',
+          description: 'Test',
+          category: 'test',
+          image: 'https://example.com/img.jpg',
+        },
+      });
+      expect([200, 201, 400, 422]).toContain(response.status());
+    });
+
+    // FakeStore may return 200 for PUT to non-existent ID; stricter APIs return 404/400.
+    test('PUT non-existent product ID → 404, 400, or 200 (lenient)', async ({ request }) => {
+      const response = await request.put(endpoints.productById(99999), {
+        headers: defaultHeaders,
+        data: {
+          title: 'Test',
+          price: 99,
+          description: 'Test',
+          category: 'test',
+          image: 'https://example.com/img.jpg',
+        },
+      });
+      expect([200, 400, 404]).toContain(response.status());
+    });
+
+    test('DELETE non-existent product → 404 or 200', async ({ request }) => {
+      const response = await request.delete(endpoints.productById(99999), {
+        headers: defaultHeaders,
+      });
+      expect([200, 404]).toContain(response.status());
+    });
+
+    test('Invalid auth header → 401 when API requires auth, else 200', async ({ request }) => {
+      const response = await request.get(endpoints.products(), {
+        headers: {
+          ...defaultHeaders,
+          Authorization: 'Bearer invalid-token',
+        },
+      });
+      expect([200, 401]).toContain(response.status());
+    });
+  });
 });

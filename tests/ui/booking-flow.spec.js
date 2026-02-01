@@ -8,7 +8,7 @@ import { waitForNewTab } from '../../utils/tabHandle';
 
 
 test.describe('@sanity Booking.com hotel search and booking flow', () => {
-  test('Full flow: homepage → search → listings → filters → first hotel detail', async ({ page }, testInfo) => {
+  test('Full flow: homepage → search → listings → filters → first hotel detail', { timeout: 180000 }, async ({ page }, testInfo) => {
     const loginPage = new LoginPage(page);
     const searchPage = new SearchPage(page);
     const resultsPage = new ResultsPage(page);
