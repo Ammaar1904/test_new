@@ -21,11 +21,11 @@ class LoginPage {
       await dismissBtn.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
     }
 
-    // Ensure main UI is ready: logo and search area (so overlay is gone)
-    await this.page.getByTestId('header-booking-logo').waitFor({ state: 'visible', timeout: 15000 });
-    // Wait for search form to be visible (search box or destination input)
-    await this.page.locator(locators.searchBox).or(this.page.locator(locators.destinationInput))
-      .first().waitFor({ state: 'visible', timeout: 10000 });
+    // Ensure main UI is ready: wait for logo OR search area (whichever appears first; site may vary)
+    const logoOrSearch = this.page.locator(locators.logo)
+      .or(this.page.locator(locators.searchBox))
+      .or(this.page.locator(locators.destinationInput));
+    await logoOrSearch.first().waitFor({ state: 'visible', timeout: 25000 });
   }
 }
 

@@ -82,7 +82,7 @@ class SearchPage {
       lang: 'en-gb',
     });
     const url = `https://www.booking.com/searchresults.en-gb.html?${params.toString()}`;
-    await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await this.page.goto(url, { waitUntil: 'commit', timeout: 45000 });
   }
 }
 

@@ -15,21 +15,21 @@ class ResultsPage {
 
   /**
    * Extract and print hotel name, price per night, rating, image URL for each listing on first page.
+   * Uses locator API only (no ElementHandle) to avoid timeouts.
    */
   async fetchAllListings() {
-    await this.page.locator(locators.hotelCard).first().waitFor();
+    const cardLocators = this.page.locator(locators.hotelCard);
+    await cardLocators.first().waitFor({ state: 'visible', timeout: 20000 });
 
-    const cards = await this.page.locator(locators.hotelCard).elementHandles();
+    const count = await cardLocators.count();
+    console.log(`\n[RESULTS] Total hotels on first page: ${count}\n`);
 
-    console.log(`\n[RESULTS] Total hotels on first page: ${cards.length}\n`);
-
-    for (let i = 0; i < cards.length; i++) {
-      const card = cards[i];
-
-      const name = await this.getText(card, locators.hotelName);
-      const price = await this.getText(card, locators.price);
-      const rating = await this.getText(card, locators.rating);
-      const imageUrl = await this.getAttribute(card, locators.image, 'src');
+    for (let i = 0; i < count; i++) {
+      const card = cardLocators.nth(i);
+      const name = await card.locator(locators.hotelName).first().textContent({ timeout: 5000 }).then((t) => t?.trim() || null).catch(() => null);
+      const price = await card.locator(locators.price).first().textContent({ timeout: 5000 }).then((t) => t?.trim() || null).catch(() => null);
+      const rating = await card.locator(locators.rating).first().textContent({ timeout: 5000 }).then((t) => t?.trim() || null).catch(() => null);
+      const imageUrl = await card.locator(locators.image).first().getAttribute('src', { timeout: 5000 }).catch(() => null);
 
       console.log(`Hotel ${i + 1}`);
       console.log(`  Name   : ${name || 'N/A'}`);
@@ -86,17 +86,6 @@ class ResultsPage {
     await this.page.locator(locators.availabilityCtaButton).first().click();
   }
 
-  async getText(parent, selector) {
-    const el = await parent.$(selector);
-    if (!el) return null;
-    return (await el.innerText()).trim();
-  }
-
-  async getAttribute(parent, selector, attr) {
-    const el = await parent.$(selector);
-    if (!el) return null;
-    return await el.getAttribute(attr);
-  }
 }
 
 export default ResultsPage;
