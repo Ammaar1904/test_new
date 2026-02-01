@@ -1,0 +1,21 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+  "test": "playwright test",
+  "test:api": "playwright test tests/api/ --project=api",
+  "test:ui": "playwright test tests/ui/ --project=chromium"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.58.1",
+    "@types/node": "^25.1.0",
+    "ajv": "^8.17.1",
+    "jsonpath-plus": "^10.3.0"
+  }
+}
