@@ -15,13 +15,6 @@ Automated hotel search and filter flow on **Booking.com** using **Playwright** a
 
 ---
 
-## Prerequisites
-
-- **Node.js** (v18+ recommended)
-- **npm** (or yarn/pnpm)
-
----
-
 ## Steps to Run
 
 ### 1. Install dependencies
@@ -39,14 +32,9 @@ npx playwright install
 ### 3. Run the Booking.com flow test
 
 ```bash
-npx playwright test tests/ui/booking-flow.spec.js --project=chromium --timeout=120000
+npx playwright test tests/ui/ --timeout=60000 --project=chromium --headed
 ```
 
-To see console output (hotel listings, room data, step logs):
-
-```bash
-npx playwright test tests/ui/booking-flow.spec.js --project=chromium --timeout=120000
-```
 
 Console logs are printed to the terminal during the run.
 
@@ -59,7 +47,7 @@ npx playwright test tests/ui/
 ### 5. Run with headed browser (watch the run)
 
 ```bash
-npx playwright test tests/ui/booking-flow.spec.js --project=chromium --headed --timeout=120000
+npx playwright test tests/ui/ --project=chromium --headed --timeout=120000
 ```
 
 ### 6. View HTML report (after a run)
@@ -77,19 +65,6 @@ npx playwright test tests/api/ --project=api
 ```
 
 Covers: GET all products (200, list ≥ 10, schema validation, JsonPath, catalog print), GET by ID (data-driven for IDs 1–3), POST new product, PUT update price, DELETE product. See `tests/api/products.spec.js`, `api/config.js`, `schemas/product.schema.json`.
-
----
-
-## Deliverables
-
-| Deliverable | Location / How to get it |
-|-------------|---------------------------|
-| **JavaScript + Playwright code** | `tests/ui/booking-flow.spec.js`, `pages/` (search, resultpage, hoteldetail, login), `locator/locator.js`, `utils/tabHandle.js` |
-| **Steps to run** | This README – see **Steps to Run** above |
-| **Console logs (hotel name, price, image link)** | Printed in the terminal when you run the flow test; also in `fetchAllListings()` in `pages/resultpage.js` |
-| **Screenshot proof of final step** | Saved by the test as `booking-final-step.png` under the run’s test-results folder (e.g. `test-results/.../booking-final-step.png`). Path is logged in the console. After run: `npx playwright show-report` and open the run to see attachments, or check the `test-results` directory. |
-
----
 
 ## Project structure
 
